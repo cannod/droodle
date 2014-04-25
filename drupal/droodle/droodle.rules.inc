@@ -25,6 +25,14 @@ function droodle_rules_action_info() {
           // a more optimized way than if each action saved the objects.
           // 'save' => TRUE,
         ),
+        'firstname' => array(
+          'type' => 'text',
+          'label' => t('The users firstname'),
+        ),
+        'lastname' => array(
+          'type' => 'text',
+          'label' => t('The users lastname'),
+        ),
       ),
     ),
 	'droodle_action_delete_user' => array(
@@ -75,6 +83,24 @@ function droodle_rules_action_info() {
           // a more optimized way than if each action saved the objects.
           // 'save' => TRUE,
         ),
+        'time_start' => array(
+          'type' => 'date',
+          'label' => t('The Enrolment start date'),
+          'optional' => TRUE,
+          // If we were to make changes to the parameter object, whe should set
+          // the 'save' property to TRUE. This makes Rules handle the saving in
+          // a more optimized way than if each action saved the objects.
+          // 'save' => TRUE,
+        ),
+        'time_end' => array(
+          'type' => 'date',
+          'label' => t('The Enrolment end date'),
+          'optional' => TRUE,
+          // If we were to make changes to the parameter object, whe should set
+          // the 'save' property to TRUE. This makes Rules handle the saving in
+          // a more optimized way than if each action saved the objects.
+          // 'save' => TRUE,
+        ),
       ),
     ),
   );
@@ -91,9 +117,9 @@ function droodle_rules_action_info() {
  *   The user object to work with. Selected by the site administrator when the
  *   action is configured.
  */
-function droodle_action_create_update_user($account) {
+function droodle_action_create_update_user($account, $firstname, $lastname) {
 
-	droodle_create_update_user($account);
+	droodle_create_update_user($account, $firstname, $lastname);
 }
 
 /**
@@ -120,8 +146,8 @@ function droodle_action_delete_user($account) {
  *   The user object to work with. Selected by the site administrator when the
  *   action is configured.
  */
-function droodle_action_enrol_user($account, $course_id) {
+function droodle_action_enrol_user($account, $course_id, $time_start, $time_end) {
 
-  droodle_enrol_user($account, $course_id);
+  droodle_enrol_user($account, $course_id, $time_start, $time_end);
 
 }

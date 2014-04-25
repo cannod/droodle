@@ -65,7 +65,7 @@ class droodle_webservice {
         return $course->id;
     }
 
-    function enrol_user ($username, $course_id, $roleid = 5)
+    function enrol_user ($username, $course_id, $roleid = 5, $timestart, $timeend)
     {
         global $CFG, $DB, $PAGE;
 
@@ -94,10 +94,12 @@ class droodle_webservice {
         $plugins = $manager->get_enrolment_plugins();
         $enrolid = 1; //manual
 
-        $today = time();
-        $today = make_timestamp(date('Y', $today), date('m', $today), date('d', $today), date ('H', $today), date ('i', $today), date ('s', $today));
-        $timestart = $today;
-        $timeend = 0;
+        //$today = time();
+        //$today = make_timestamp(date('Y', $today), date('m', $today), date('d', $today), date ('H', $today), date ('i', $today), date ('s', $today));
+        //$timestart = $today;
+        //$timeend = 0;
+        $timestart = isset($timestart) ? $timestart : 0;
+        $timeend = isset($timeend) ? $timeend : 0;
 
         $found = false;
         foreach ($instances as $instance)
@@ -114,8 +116,9 @@ class droodle_webservice {
 
         $plugin = $plugins['manual'];
 
-        if ( $instance->enrolperiod)
-            $timeend   = $timestart + $instance->enrolperiod;
+        
+        //if ( $instance->enrolperiod)
+        //    $timeend   = $timestart + $instance->enrolperiod;
 
         // First, check if user is already enroled but suspended, so we just need to enable it
 
@@ -142,7 +145,7 @@ class droodle_webservice {
             $ue->status = 0; //active
             $ue->timestart = $timestart;
             $ue->timeend = $timeend;
-            $ue->timemodified = $timestart;
+            $ue->timemodified = time();
             $DB->update_record('user_enrolments', $ue);
             return 1;
         }

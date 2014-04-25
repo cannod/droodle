@@ -60,21 +60,23 @@ class droodle_helpers_external extends external_api {
                             'username' => new external_value(PARAM_TEXT, 'username'),
                             'id' => new external_value(PARAM_INT, 'course id'),
                             'roleid' => new external_value(PARAM_INT, 'role id'),
+                            'timestart' => new external_value(PARAM_INT, 'Timestamp when the enrolment starts', VALUE_OPTIONAL),
+                            'timeend' => new external_value(PARAM_INT, 'Timestamp when the enrolment ends', VALUE_OPTIONAL),
                         )
         );
     }
 
     public static function enrol_user_returns() {
-        return new  external_value(PARAM_INT, 'user created');
+        return new  external_value(PARAM_INT, 'user enrolled');
     }
 
-    public static function enrol_user($username, $id, $roleid) { 
+    public static function enrol_user($username, $id, $roleid, $timestart, $timeend) { 
         global $CFG, $DB;
  
-        $params = self::validate_parameters(self::enrol_user_parameters(), array('username'=>$username, 'id' => $id, 'roleid' => $roleid));
+        $params = self::validate_parameters(self::enrol_user_parameters(), array('username'=>$username, 'id' => $id, 'roleid' => $roleid, 'timestart' => $timestart, 'timeend' => $timeend));
  
 		$webservice = new  droodle_webservice ();
-		$id = $webservice->enrol_user ($username, $id, $roleid);
+		$id = $webservice->enrol_user ($username, $id, $roleid, $timestart, $timeend);
 
         return $id;
     }

@@ -30,8 +30,14 @@ function droodle_delete_user($account) {
     }
 }
 
-function droodle_enrol_user($account, $idnumber) {
+function droodle_enrol_user($account, $idnumber, $timestart = 0, $timeend = 0) {
 
+  
+  //debug($timestart);
+  //debug($timeend);
+  // looks like they are in unixtime. Check though.
+  
+  
   // create account in case it's not there.
   droodle_create_update_user($account);
   
@@ -45,7 +51,7 @@ function droodle_enrol_user($account, $idnumber) {
   // enrol the user
   $username = $account->name;
   
-  $response = droodle_droodle_enrol_user($username, $id);
+  $response = droodle_droodle_enrol_user($username, $id, 5, $timestart, $timeend);
   
     if ($response == 1) {
       watchdog('droodle', 'Successfully enrolled user %username into Moodle course %id.', array('%username' => $username, '%id' => $id));
@@ -54,7 +60,7 @@ function droodle_enrol_user($account, $idnumber) {
     }
 }
 
-function droodle_create_update_user($account) {
+function droodle_create_update_user($account, $firstname = '', $lastname = '') {
 
   $config = droodle_get_config();
   
@@ -62,11 +68,11 @@ function droodle_create_update_user($account) {
 
   $username = $account->name;
   $email = $account->mail;
-  $address = field_fetch_field_values('user', $account, 'field_address', 0);
+  //$address = field_fetch_field_values('user', $account, 'field_address', 0);
   //$firstname = field_fetch_field_values('user', $account, 'field_address', 0);
   //$lastname = field_fetch_field_values('user', $account, 'field_lastname', 0);
-  $firstname = $address['first_name'];
-  $lastname = $address['last_name'];
+  //$firstname = $address['first_name'];
+  //$lastname = $address['last_name'];
  
   //drupal_set_message('<pre.' . print_r($address, true) . '</pre>');
  
@@ -135,7 +141,7 @@ function droodle_droodle_course_id($idnumber) {
 
 }
 
-function droodle_droodle_enrol_user($username, $id, $roleid = 5) {
+function droodle_droodle_enrol_user($username, $id, $roleid = 5, $timestart, $timeend) {
 
   $config = droodle_get_config();
   $functionname = 'droodle_enrol_user';
@@ -146,6 +152,8 @@ function droodle_droodle_enrol_user($username, $id, $roleid = 5) {
             'username' => $username,
 			'id' => $id,
             'roleid' => $roleid,
+            'timestart' => $timestart,
+            'timeend' => $timeend,
 			);
 
   $response = droodle_make_request($url, HttpClientRequest::METHOD_POST, $params, $data);
