@@ -35,7 +35,13 @@ $functions = array(
         'description' => 'Get course id.',    //human readable description of the web service function
         'type'        => 'read',                  //database rights of the web service function (read, write)
     ),
-
+    'droodle_test_connection' => array(         //web service function name
+        'classname'   => 'droodle_helpers_external',  //class containing the external function
+        'methodname'  => 'test_connection',          //external function name
+        'classpath'   => 'local/droodle/helpers/externallib.php',  //file containing the class/external function
+        'description' => 'Test connection.',    //human readable description of the web service function
+        'type'        => 'read',                  //database rights of the web service function (read, write)
+    ),
 );
 
 ?>

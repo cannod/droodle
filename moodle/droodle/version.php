@@ -1,9 +1,14 @@
 <?php
 
-$plugin->version  = 2014042500;
-//$plugin->requires = 2010000000;
-$plugin->requires = 2010112400;
-$plugin->maturity = MATURITY_BETA;
-$plugin->release = "1.0";
+/**
+ * Version details
+ *
+ * @package    droodle
+ * @author     Dave Cannon
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
-?>
+defined('MOODLE_INTERNAL') || die();
+
+$plugin->version   = 2014053100;        // The current plugin version (Date: YYYYMMDDXX)
+$plugin->requires  = 2014050800;        // Requires this Moodle version

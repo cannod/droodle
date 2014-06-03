@@ -17,6 +17,19 @@ function droodle_menu() {
   return $items;
 }
 
+function droodle_test_connection() {
+  
+	$response = droodle_droodle_test_connection();
+
+    if ($response == 1) {
+      watchdog('droodle', 'Connection to moodle success!', array());
+      drupal_set_message(t('Connection to moodle success!'));
+    } else {
+      watchdog('droodle', 'ERROR connecting to Moodle.', array(), WATCHDOG_ERROR);
+      drupal_set_message(t('Could not connect! Please check system log for details.'), 'error');
+    }  
+}
+
 function droodle_delete_user($account) {
 
   $username = $account->name;
@@ -36,7 +49,6 @@ function droodle_enrol_user($account, $idnumber, $timestart = 0, $timeend = 0) {
   //debug($timestart);
   //debug($timeend);
   // looks like they are in unixtime. Check though.
-  
   
   // create account in case it's not there.
   droodle_create_update_user($account);
@@ -104,6 +116,21 @@ function droodle_droodle_delete_user($username) {
   $params = array();
 
   $response = droodle_make_request($url, HttpClientRequest::METHOD_POST, $params, $data);
+  
+  return $response;
+
+}
+
+function droodle_droodle_test_connection() {
+
+  $config = droodle_get_config();
+  $functionname = 'droodle_test_connection';
+  $data = array();
+	
+  $url = $config['fqdn'] . $config['endpoint'] . '?wstoken=' . $config['token'] . '&wsfunction=' . $functionname . '&moodlewsrestformat=' . $config['restformat'];
+  $params = array();
+
+  $response = droodle_make_request($url, HttpClientRequest::METHOD_GET, $params, $data);
   
   return $response;
 
@@ -178,10 +205,13 @@ function droodle_make_request($url, $method, $params, $data) {
   'parameters' => $params,
   'data' => $data,
   ));
-  debug($request);
+  //debug($request);
   try {
     $response = $client->execute($request);
-    debug($response);
+    if ($response['exception']) {
+      watchdog('droodle', 'Exception detected. Exception: %e, Message: %m, Error code: %ec', array('%e' => $response['exception'], '%m' => $response['message'], '%ec' => $response['errorcode']), WATCHDOG_ERROR);
+    }
+    //debug($response);
   }
   catch (HttpClientException $e) {
     ////debug($e);

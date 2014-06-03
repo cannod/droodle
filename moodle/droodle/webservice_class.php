@@ -98,8 +98,7 @@ class droodle_webservice {
         //$today = make_timestamp(date('Y', $today), date('m', $today), date('d', $today), date ('H', $today), date ('i', $today), date ('s', $today));
         //$timestart = $today;
         //$timeend = 0;
-        $timestart = isset($timestart) ? $timestart : time();
-        $timeend = isset($timeend) ? $timeend : 0;
+
 
         $found = false;
         foreach ($instances as $instance)
@@ -116,9 +115,15 @@ class droodle_webservice {
 
         $plugin = $plugins['manual'];
 
+        $timestart = isset($timestart) ? $timestart : time();
         
-        if ( $instance->enrolperiod)
-            $timeend   = $timestart + $instance->enrolperiod;
+        $timeend = isset($timeend) ? $timeend : 0;
+        
+        // Only use default enrol period if no timeend set.
+        if ($timeend == 0) {
+          if ( $instance->enrolperiod)
+              $timeend   = $timestart + $instance->enrolperiod;
+        }
 
         // First, check if user is already enroled but suspended, so we just need to enable it
 
@@ -197,6 +202,11 @@ class droodle_webservice {
             return 1;
         }
         return 0;
+    }
+    
+    function test_connection ()
+    {
+        return 1;
     }
 
 } //class

@@ -10,6 +10,17 @@ function droodle_admin_settings() {
 
   $form = array();
   
+  $form['droodle_test'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Test Droodle'),
+  );
+
+  $form['droodle_test']['test'] = array(
+    '#type' => 'submit',
+    '#value' => t('Test the connection to Moodle.'),
+    '#submit' => array('droodle_test_submit'),
+  );
+  
   $form['droodle_token'] = array(
     '#type' => 'textfield',
     '#default_value' => variable_get('droodle_token', ''),
@@ -53,3 +64,11 @@ function droodle_admin_settings() {
   return system_settings_form($form);
 }
 
+/**
+ * Submit callback; test moodle connection.
+ *
+ * @ingroup forms
+ */
+function droodle_test_submit($form, &$form_state) {
+  droodle_test_connection();
+}

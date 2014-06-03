@@ -132,5 +132,26 @@ class droodle_helpers_external extends external_api {
 
         return $id;
     }
+    
+	/* test_connection */
+    public static function test_connection_parameters() {
+        return new external_function_parameters(
+                        array(
+                        )
+        );
+    }
+
+    public static function test_connection_returns() {
+        return new  external_value(PARAM_BOOL, 'connection established');
+    }
+
+    public static function test_connection() { 
+        global $CFG, $DB;
+ 
+		$webservice = new  droodle_webservice ();
+		$id = $webservice->test_connection ();
+
+        return $id;
+    }
 }
 ?>
