@@ -153,5 +153,56 @@ class droodle_helpers_external extends external_api {
 
         return $id;
     }
+    
+	/* add group member */
+    public static function add_group_member_parameters() {
+        return new external_function_parameters(
+                        array(
+                            'username' => new external_value(PARAM_TEXT, 'username'),
+                            'id' => new external_value(PARAM_INT, 'course id'),
+                            'group' => new external_value(PARAM_TEXT, 'group name'),
+                        )
+        );
+    }
+
+    public static function add_group_member_returns() {
+        return new  external_value(PARAM_INT, 'user added to group');
+    }
+
+    public static function add_group_member($username, $id, $group) { 
+        global $CFG, $DB;
+ 
+        $params = self::validate_parameters(self::add_group_member_parameters(), array('username'=>$username, 'id' => $id, 'group' => $group));
+ 
+		$webservice = new  droodle_webservice ();
+		$id = $webservice->add_group_member ($username, $id, $group);
+
+        return $id;
+    }
+    
+    // Unenrol user totally
+    public static function unenrol_user_parameters() {
+        return new external_function_parameters(
+                        array(
+                            'username' => new external_value(PARAM_TEXT, 'username'),
+                            'id' => new external_value(PARAM_INT, 'course id'),
+                        )
+        );
+    }
+
+    public static function unenrol_user_returns() {
+        return new  external_value(PARAM_INT, 'user unenrolled');
+    }
+
+    public static function unenrol_user($username, $id) {
+        global $CFG, $DB;
+
+        $params = self::validate_parameters(self::unenrol_user_parameters(), array('username' => $username, 'id' => $id));
+
+        $auth = new  droodle_webservice ();
+        $id = $auth->unenrol_user ($username, $id);
+
+        return $id;
+    }
 }
 ?>

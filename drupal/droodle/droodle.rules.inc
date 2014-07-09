@@ -103,6 +103,54 @@ function droodle_rules_action_info() {
         ),
       ),
     ),
+	'droodle_action_unenrol_user' => array(
+      'label' => t('Unenrol user from Moodle courses'),
+      'group' => t('Droodle'),
+      'parameter' => array(
+        // Each parameter is keyed with an internally used machine name.
+        'account' => array(
+          'type' => 'user',
+          'label' => t('The user to be unenrolled'),
+        ),
+        'course_id' => array(
+          'type' => 'text',
+          'label' => t('The Moodle course ID number'),
+        ),
+      ),
+    ),
+	'droodle_action_add_group_member' => array(
+      'label' => t('Add member to Moodle course group'),
+      'group' => t('Droodle'),
+      // When declaring parameters, site builders will by default get a form to
+      // select fitting data. In this case, we require the site builder to
+      // select a user object. The 'type' could be any data type known to Rules,
+      // which means any entity type known to Entity API or any additional data
+      // type declared by hook_rules_data_info – by default including things
+      // like 'integer', 'text' and more. See
+      'parameter' => array(
+        // Each parameter is keyed with an internally used machine name.
+        'account' => array(
+          'type' => 'user',
+          'label' => t('The user to be added to group'),
+          // If we were to make changes to the parameter object, whe should set
+          // the 'save' property to TRUE. This makes Rules handle the saving in
+          // a more optimized way than if each action saved the objects.
+          // 'save' => TRUE,
+        ),
+        'course_id' => array(
+          'type' => 'text',
+          'label' => t('The Moodle course ID number'),
+          // If we were to make changes to the parameter object, whe should set
+          // the 'save' property to TRUE. This makes Rules handle the saving in
+          // a more optimized way than if each action saved the objects.
+          // 'save' => TRUE,
+        ),
+        'group' => array(
+          'type' => 'text',
+          'label' => t('The group name'),
+        ),
+      ),
+    ),
   );
 
   return $actions;
@@ -150,4 +198,33 @@ function droodle_action_enrol_user($account, $course_id, $time_start, $time_end)
 
   droodle_enrol_user($account, $course_id, $time_start, $time_end);
 
+}
+
+/**
+ * The action function for the 'droodle_action_unenrol_user'.
+ *
+ * The $account parameter is the user object sent into this action, selected in
+ * the Rules configuration interface.
+ * @param <object> $account
+ *   The user object to work with. Selected by the site administrator when the
+ *   action is configured.
+ */
+function droodle_action_unenrol_user($account, $course_id) {
+
+  droodle_unenrol_user($account, $course_id);
+
+}
+
+/**
+ * The action function for the 'droodle_action_add_group_member'.
+ *
+ * The $account parameter is the user object sent into this action, selected in
+ * the Rules configuration interface.
+ * @param <object> $account
+ *   The user object to work with. Selected by the site administrator when the
+ *   action is configured.
+ */
+function droodle_action_add_group_member($account, $course_id, $group) {
+
+	droodle_add_group_member($account, $course_id, $group);
 }

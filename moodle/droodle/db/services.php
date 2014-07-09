@@ -42,6 +42,20 @@ $functions = array(
         'description' => 'Test connection.',    //human readable description of the web service function
         'type'        => 'read',                  //database rights of the web service function (read, write)
     ),
+    'droodle_add_group_member' => array(        
+        'classname'   => 'droodle_helpers_external',
+        'methodname'  => 'add_group_member', 
+        'classpath'   => 'local/droodle/helpers/externallib.php',
+        'description' => 'Add group member.', 
+        'type'        => 'read',                 
+    ),
+   'droodle_unenrol_user' => array(
+        'classname'   => 'droodle_helpers_external',
+        'methodname'  => 'unenrol_user',
+        'classpath'   => 'local/droodle/helpers/externallib.php',
+        'description' => 'Unenrol user',
+        'type'        => 'read',
+    ),
 );
 
 ?>

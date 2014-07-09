@@ -159,6 +159,42 @@ class droodle_webservice {
 
         return 1;
     }
+    
+	// Unenrol user totally
+	function unenrol_user ($username, $course_id)
+	{  
+
+        global $CFG, $DB;
+
+        $username = utf8_decode ($username);
+        $username = strtolower ($username);
+
+        $conditions = array ('courseid' => $course_id, 'enrol' => 'manual');
+        $enrol = $DB->get_record('enrol', $conditions);
+    
+        if (!$enrol)
+            return;
+
+        $conditions = array ('username' => $username);
+        $user = $DB->get_record('user', $conditions);
+        
+        if (!$user)
+            return;
+
+        $conditions = array ('enrolid' => $enrol->id, 'userid' => $user->id);
+        $ue = $DB->get_record('user_enrolments', $conditions);
+
+        if (!$ue)
+            return;
+
+        $instance = $DB->get_record('enrol', array('id'=>$ue->enrolid), '*', MUST_EXIST);
+
+        $plugin = enrol_get_plugin($instance->enrol);
+
+        $plugin->unenrol_user($instance, $ue->userid);
+        
+        return 1;
+	}
 
     function create_user ($username, $firstname, $lastname, $email, $auth) {
 
@@ -208,10 +244,49 @@ class droodle_webservice {
     {
         return 1;
     }
+    
+    function add_group_member ($username, $course_id, $group_name)
+    {
+        global $CFG, $DB;
 
+        $username = utf8_decode ($username);
+        $username = strtolower ($username);
+        /* Check that user exists */
+        $conditions = array ('username' => $username);
+        $user = $DB->get_record('user',$conditions);
+        if (!$user)
+            return 0;
+
+        /* Check that course exists */
+        $user = $DB->get_record('user',$conditions);
+        $conditions = array ('id' => $course_id);
+        $course = $DB->get_record('course', $conditions);
+
+        if (!$course)
+            return 0;
+        
+        /* check if group exists */
+        $conditions = array ('name' => $group_name, 'courseid' => $course->id);
+        $group = $DB->get_record ('groups', $conditions);
+
+        /* create group if not exist */
+        if (!$group)
+        {
+            // Create group if it does not exist
+
+            $data->courseid = $course->id;
+		    $data->name = $group_name;
+
+            groups_create_group ($data);
+        }
+
+        $conditions = array ('name' => $group_name, 'courseid' => $course->id);
+        $group = $DB->get_record ('groups', $conditions);
+
+        groups_add_member ($group->id, $user->id);
+        
+        return 1;
+        
+    }
 } //class
-
-
-
-
 ?>
