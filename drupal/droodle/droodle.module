@@ -1,12 +1,17 @@
 <?php
 
 /**
+ * @file
+ * Droodle module
+ */
+
+/**
  * Implements hook_menu().
  */
 function droodle_menu() {
 
   $items['admin/config/services/droodle'] = array(
-    'title' => 'Moodle API webservice settings',
+    'title' => 'Moodle API webservice settings (droodle)',
     'description' => 'Configure Moodle WebService.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('droodle_admin_settings'),
@@ -18,114 +23,116 @@ function droodle_menu() {
 }
 
 function droodle_test_connection() {
-  
-	$response = droodle_droodle_test_connection();
 
-    if ($response == 1) {
-      watchdog('droodle', 'Connection to moodle success!', array());
-      drupal_set_message(t('Connection to moodle success!'));
-    } else {
-      watchdog('droodle', 'ERROR connecting to Moodle.', array(), WATCHDOG_ERROR);
-      drupal_set_message(t('Could not connect! Please check system log for details.'), 'error');
-    }  
+  $response = droodle_droodle_test_connection();
+
+  if ($response == 1) {
+    watchdog('droodle', 'Connection to moodle success!', array());
+    drupal_set_message(t('Connection to moodle success!'));
+  }
+  else {
+    watchdog('droodle', 'ERROR connecting to Moodle.', array(), WATCHDOG_ERROR);
+    drupal_set_message(t('ERROR connecting to Moodle! Please check system log for details.'), 'error');
+  }
 }
 
 function droodle_delete_user($account) {
 
   $username = $account->name;
 
-	$response = droodle_droodle_delete_user($username);
+  $response = droodle_droodle_delete_user($username);
 
-    if ($response == 1) {
-      watchdog('droodle', 'Moodle account successfully deleted for user %username.', array('%username' => $username));
-    } else {
-      watchdog('droodle', 'ERROR deleting Moodle account for user %username.', array('%username' => $username), WATCHDOG_ERROR);
-    }
+  if ($response == 1) {
+    watchdog('droodle', 'Moodle account successfully deleted for user %username.', array('%username' => $username));
+  }
+  else {
+    watchdog('droodle', 'ERROR deleting Moodle account for user %username.', array('%username' => $username), WATCHDOG_ERROR);
+  }
 }
 
 function droodle_enrol_user($account, $idnumber, $timestart = 0, $timeend = 0) {
 
-  
   //debug($timestart);
   //debug($timeend);
   // looks like they are in unixtime. Check though.
-  
+
   // create account in case it's not there.
   droodle_create_update_user($account);
-  
+
   $id = droodle_droodle_course_id($idnumber);
-  
+
   if (empty($id)) {
     watchdog('droodle', 'ERROR could not find Moodle course with course ID number - %idnumber.', array('%idnumber' => $idnumber), WATCHDOG_ERROR);
-	return;
+    return;
   }
   // Cool we have a course id.
   // enrol the user
   $username = $account->name;
-  
+
   $response = droodle_droodle_enrol_user($username, $id, 5, $timestart, $timeend);
-  
-    if ($response == 1) {
-      watchdog('droodle', 'Successfully enrolled user %username into Moodle course %id.', array('%username' => $username, '%id' => $id));
-    } else {
-      watchdog('droodle', 'ERROR enrolling user %username into Moodle course %id.', array('%username' => $username, '%id' => $id), WATCHDOG_ERROR);
-    }
+
+  if ($response == 1) {
+    watchdog('droodle', 'Successfully enrolled user %username into Moodle course %id.', array('%username' => $username, '%id' => $id));
+  }
+  else {
+    watchdog('droodle', 'ERROR enrolling user %username into Moodle course %id.', array('%username' => $username, '%id' => $id), WATCHDOG_ERROR);
+  }
 }
 
 function droodle_unenrol_user($account, $idnumber) {
 
   // create account in case it's not there.
   droodle_create_update_user($account);
-  
+
   $id = droodle_droodle_course_id($idnumber);
-  
+
   if (empty($id)) {
     watchdog('droodle', 'ERROR could not find Moodle course with course ID number - %idnumber.', array('%idnumber' => $idnumber), WATCHDOG_ERROR);
-	return;
+    return;
   }
   // Cool we have a course id.
   // unenrol the user
   $username = $account->name;
-  
-    $response = droodle_droodle_unenrol_user($username, $id);
-  
-    //$response = 1;
-    
-    if ($response == 1) {
-      watchdog('droodle', 'Successfully unenrolled user %username from Moodle course %id.', array('%username' => $username, '%id' => $id));
-    } else {
-      watchdog('droodle', 'ERROR unenrolling user %username from Moodle course %id.', array('%username' => $username, '%id' => $id), WATCHDOG_ERROR);
-    }
+
+  $response = droodle_droodle_unenrol_user($username, $id);
+
+  if ($response == 1) {
+    watchdog('droodle', 'Successfully unenrolled user %username from Moodle course %id.', array('%username' => $username, '%id' => $id));
+  }
+  else {
+    watchdog('droodle', 'ERROR unenrolling user %username from Moodle course %id.', array('%username' => $username, '%id' => $id), WATCHDOG_ERROR);
+  }
 }
 
 function droodle_add_group_member($account, $idnumber, $group) {
-  
+
   // create account in case it's not there.
   droodle_create_update_user($account);
-  
+
   $id = droodle_droodle_course_id($idnumber);
 
   if (empty($id)) {
     watchdog('droodle', 'ERROR could not find Moodle course with course ID number - %idnumber.', array('%idnumber' => $idnumber), WATCHDOG_ERROR);
-	return;
+    return;
   }
   // Cool we have a course id.
   // add user to group
   $username = $account->name;
-  
+
   $response = droodle_droodle_add_group_member($username, $id, $group);
-  
+
   if ($response == 1) {
     watchdog('droodle', 'Successfully added user %username to group %group in Moodle course %id.', array('%username' => $username, '%group' => $group, '%id' => $id));
-  } else {
+  }
+  else {
     watchdog('droodle', 'ERROR adding user %username to group %group in Moodle course %id.', array('%username' => $username, '%group' => $group, '%id' => $id), WATCHDOG_ERROR);
-  }  
+  }
 }
 
 function droodle_create_update_user($account, $firstname = '', $lastname = '') {
 
   $config = droodle_get_config();
-  
+
   $auth = $config['authtype'];
 
   $username = $account->name;
@@ -135,25 +142,26 @@ function droodle_create_update_user($account, $firstname = '', $lastname = '') {
   //$lastname = field_fetch_field_values('user', $account, 'field_lastname', 0);
   //$firstname = $address['first_name'];
   //$lastname = $address['last_name'];
- 
-  //drupal_set_message('<pre.' . print_r($address, true) . '</pre>');
- 
- 
-  $user = array(
-      'username' => $username,
-      'firstname' => $firstname,
-      'lastname' => $lastname,
-      'email' => $email,
-	  'auth' => $auth,
-  ); 
 
-  	$response = droodle_droodle_create_user($user);
-	
-    if ($response == 1) {
-      watchdog('droodle', 'Moodle account successfully created/updated for user %username.', array('%username' => $user['username']));
-    } else {
-      watchdog('droodle', 'ERROR creating/updating Moodle account for user %username.', array('%username' => $user['username']), WATCHDOG_ERROR);
-    }
+  //drupal_set_message('<pre.' . print_r($address, true) . '</pre>');
+
+
+  $user = array(
+    'username' => $username,
+    'firstname' => $firstname,
+    'lastname' => $lastname,
+    'email' => $email,
+    'auth' => $auth,
+  );
+
+  $response = droodle_droodle_create_user($user);
+
+  if ($response == 1) {
+    watchdog('droodle', 'Moodle account successfully created/updated for user %username.', array('%username' => $user['username']));
+  }
+  else {
+    watchdog('droodle', 'ERROR creating/updating Moodle account for user %username.', array('%username' => $user['username']), WATCHDOG_ERROR);
+  }
 }
 
 function droodle_droodle_delete_user($username) {
@@ -161,12 +169,12 @@ function droodle_droodle_delete_user($username) {
   $config = droodle_get_config();
   $functionname = 'droodle_delete_user';
   $data = array('username' => $username);
-	
+
   $url = $config['fqdn'] . $config['endpoint'] . '?wstoken=' . $config['token'] . '&wsfunction=' . $functionname . '&moodlewsrestformat=' . $config['restformat'];
   $params = array();
 
   $response = droodle_make_request($url, HttpClientRequest::METHOD_POST, $params, $data);
-  
+
   return $response;
 
 }
@@ -176,30 +184,30 @@ function droodle_droodle_test_connection() {
   $config = droodle_get_config();
   $functionname = 'droodle_test_connection';
   $data = array();
-	
+
   $url = $config['fqdn'] . $config['endpoint'] . '?wstoken=' . $config['token'] . '&wsfunction=' . $functionname . '&moodlewsrestformat=' . $config['restformat'];
   $params = array();
 
   $response = droodle_make_request($url, HttpClientRequest::METHOD_GET, $params, $data);
-  
+
   return $response;
 
 }
 
 function droodle_droodle_create_user($user) {
   //create the moodle user
-   
+
   $config = droodle_get_config();
   $functionname = 'droodle_create_user';
   $data = $user;
-	
+
   $url = $config['fqdn'] . $config['endpoint'] . '?wstoken=' . $config['token'] . '&wsfunction=' . $functionname . '&moodlewsrestformat=' . $config['restformat'];
   $params = array();
 
   $response = droodle_make_request($url, HttpClientRequest::METHOD_POST, $params, $data);
-  
+
   return $response;
-  
+
 }
 
 function droodle_droodle_course_id($idnumber) {
@@ -212,9 +220,8 @@ function droodle_droodle_course_id($idnumber) {
   $data = array('idnumber' => $idnumber);
 
   $response = droodle_make_request($url, HttpClientRequest::METHOD_POST, $params, $data);
-  
-  return $response;
 
+  return $response;
 
 }
 
@@ -226,15 +233,15 @@ function droodle_droodle_enrol_user($username, $id, $roleid = 5, $timestart, $ti
   $url = $config['fqdn'] . $config['endpoint'] . '?wstoken=' . $config['token'] . '&wsfunction=' . $functionname . '&moodlewsrestformat=' . $config['restformat'];
   $params = array();
   $data = array(
-            'username' => $username,
-			'id' => $id,
-            'roleid' => $roleid,
-            'timestart' => $timestart,
-            'timeend' => $timeend,
-			);
+    'username' => $username,
+    'id' => $id,
+    'roleid' => $roleid,
+    'timestart' => $timestart,
+    'timeend' => $timeend,
+  );
 
   $response = droodle_make_request($url, HttpClientRequest::METHOD_POST, $params, $data);
-  
+
   return $response;
 
 }
@@ -247,11 +254,11 @@ function droodle_droodle_unenrol_user($username, $id) {
   $url = $config['fqdn'] . $config['endpoint'] . '?wstoken=' . $config['token'] . '&wsfunction=' . $functionname . '&moodlewsrestformat=' . $config['restformat'];
   $params = array();
   $data = array(
-            'username' => $username,
-			'id' => $id,
-			);
+    'username' => $username,
+    'id' => $id,
+  );
   $response = droodle_make_request($url, HttpClientRequest::METHOD_POST, $params, $data);
-  
+
   return $response;
 
 }
@@ -264,28 +271,29 @@ function droodle_droodle_add_group_member($username, $course_id, $group) {
   $url = $config['fqdn'] . $config['endpoint'] . '?wstoken=' . $config['token'] . '&wsfunction=' . $functionname . '&moodlewsrestformat=' . $config['restformat'];
   $params = array();
   $data = array(
-            'username' => $username,
-			'id' => $course_id,
-            'group' => $group,
-			);
+    'username' => $username,
+    'id' => $course_id,
+    'group' => $group,
+  );
 
   $response = droodle_make_request($url, HttpClientRequest::METHOD_POST, $params, $data);
-  
+
   return $response;
 
 }
 
 function droodle_make_request($url, $method, $params, $data) {
+
   $response = '';
-  $formatter = new HttpClientCompositeFormatter(HttpClientBaseFormatter::FORMAT_FORM, HttpClientBaseFormatter::FORMAT_JSON);	
-  $client = new HttpClient(NULL, $formatter);
+  $formatter = new HttpClientCompositeFormatter(HttpClientBaseFormatter::FORMAT_FORM, HttpClientBaseFormatter::FORMAT_JSON);
+  $client = new HttpClient(null, $formatter);
 
   $client->options['curlopts'] = array(
         CURLOPT_SSL_VERIFYHOST => 0,            // don't verify ssl
         CURLOPT_SSL_VERIFYPEER => false,        //
         CURLOPT_VERBOSE        => 1                //
-    ); 
-  
+  );
+
   $request = new HttpClientRequest($url, array(
   'method' => $method,
   'parameters' => $params,
@@ -301,9 +309,11 @@ function droodle_make_request($url, $method, $params, $data) {
   }
   catch (HttpClientException $e) {
     //debug($e);
-	watchdog('droodle', '%e', array('%e' => $e), WATCHDOG_ERROR);
+    watchdog('droodle', '%e', array('%e' => $e), WATCHDOG_ERROR);
   }
-   return $response;
+
+  return $response;
+
 }
 
 function droodle_get_config() {
@@ -317,11 +327,11 @@ function droodle_get_config() {
     'cohort_name' => variable_get('droodle_cohort_name'),
     'cohort_description' => variable_get('droodle_cohort_description'),
     'cohort_id' => variable_get('droodle_cohort_id'),
-	'authtype' => variable_get('droodle_authtype'),
-	);
-   
+    'authtype' => variable_get('droodle_authtype'),
+  );
+
   return $config;
-  
+
 }
 
 /**
