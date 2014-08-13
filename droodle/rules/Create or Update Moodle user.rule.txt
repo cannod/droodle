@@ -1,0 +1,14 @@
+{ "rules_create_update_moodle_user" : {
+    "LABEL" : "Create or Update Moodle user",
+    "PLUGIN" : "reaction rule",
+    "OWNER" : "rules",
+    "REQUIRES" : [ "rules" ],
+    "ON" : { "user_insert" : [], "user_update" : [] },
+    "IF" : [
+      { "entity_has_field" : { "entity" : [ "account" ], "field" : "field_address" } }
+    ],
+    "DO" : [
+      { "component_rules_create_or_update_moodle_user" : { "account" : [ "account" ] } }
+    ]
+  }
+}
