@@ -1,9 +1,0 @@
-{ "rules_delete_moodle_account" : {
-    "LABEL" : "Delete Moodle account",
-    "PLUGIN" : "reaction rule",
-    "OWNER" : "rules",
-    "REQUIRES" : [ "droodle", "rules" ],
-    "ON" : { "user_delete" : [] },
-    "DO" : [ { "droodle_action_delete_user" : { "account" : [ "account" ] } } ]
-  }
-}

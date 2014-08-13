@@ -1,9 +1,0 @@
-name = Web service moodle client (Droodle)
-description = Interact with moodle sites, provides Rules integration.
-package = Services
-core = 7.x
-
-dependencies[] = http_client
-dependencies[] = rules
-
-version = "7.x-1.0"
