@@ -1,0 +1,19 @@
+{ "rules_create_or_update_moodle_user" : {
+    "LABEL" : "Create or Update Moodle user",
+    "PLUGIN" : "rule",
+    "OWNER" : "rules",
+    "REQUIRES" : [ "rules", "droodle" ],
+    "USES VARIABLES" : { "account" : { "label" : "The user", "type" : "user" } },
+    "IF" : [
+      { "entity_has_field" : { "entity" : [ "account" ], "field" : "field_address" } }
+    ],
+    "DO" : [
+      { "droodle_action_create_update_user" : {
+          "account" : [ "account" ],
+          "firstname" : [ "account:field-address:first-name" ],
+          "lastname" : [ "account:field-address:last-name" ]
+        }
+      }
+    ]
+  }
+}
