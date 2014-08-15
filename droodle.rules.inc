@@ -62,7 +62,7 @@ function droodle_rules_action_info() {
     ),
   ),
   'droodle_action_enrol_user' => array(
-    'label' => t('Enrol user into Moodle courses'),
+    'label' => t('Enrol user into a Moodle course'),
     'group' => t('Droodle'),
     // When declaring parameters, site builders will by default get a form to
     // select fitting data. In this case, we require the site builder to
@@ -109,7 +109,7 @@ function droodle_rules_action_info() {
     ),
   ),
   'droodle_action_unenrol_user' => array(
-    'label' => t('Unenrol user from Moodle courses'),
+    'label' => t('Unenrol user from a Moodle course'),
     'group' => t('Droodle'),
     'parameter' => array(
       // Each parameter is keyed with an internally used machine name.
@@ -124,7 +124,7 @@ function droodle_rules_action_info() {
     ),
   ),
   'droodle_action_add_group_member' => array(
-    'label' => t('Add member to Moodle course group'),
+    'label' => t('Add member to a Moodle course group'),
     'group' => t('Droodle'),
     // When declaring parameters, site builders will by default get a form to
     // select fitting data. In this case, we require the site builder to
