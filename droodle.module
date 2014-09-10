@@ -56,9 +56,6 @@ function droodle_enrol_user($account, $idnumber, $timestart = 0, $timeend = 0) {
   //debug($timeend);
   // looks like they are in unixtime. Check though.
 
-  // create account in case it's not there.
-  droodle_create_update_user($account);
-
   $id = droodle_droodle_course_id($idnumber);
 
   if (empty($id)) {
@@ -81,9 +78,6 @@ function droodle_enrol_user($account, $idnumber, $timestart = 0, $timeend = 0) {
 
 function droodle_unenrol_user($account, $idnumber) {
 
-  // create account in case it's not there.
-  droodle_create_update_user($account);
-
   $id = droodle_droodle_course_id($idnumber);
 
   if (empty($id)) {
@@ -105,9 +99,6 @@ function droodle_unenrol_user($account, $idnumber) {
 }
 
 function droodle_add_group_member($account, $idnumber, $group) {
-
-  // create account in case it's not there.
-  droodle_create_update_user($account);
 
   $id = droodle_droodle_course_id($idnumber);
 
