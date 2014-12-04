@@ -34,6 +34,7 @@ function droodle_test_connection() {
     watchdog('droodle', 'ERROR connecting to Moodle.', array(), WATCHDOG_ERROR);
     drupal_set_message(t('ERROR connecting to Moodle! Please check system log for details.'), 'error');
   }
+
 }
 
 function droodle_delete_user($account) {
@@ -69,7 +70,7 @@ function droodle_enrol_user($account, $idnumber, $timestart = 0, $timeend = 0) {
   $response = droodle_droodle_enrol_user($username, $id, 5, $timestart, $timeend);
 
   if ($response == 1) {
-    watchdog('droodle', 'Successfully enrolled user %username into Moodle course %id.', array('%username' => $username, '%id' => $id));
+    watchdog('droodle', 'Successfully enrolled user %username into Moodle course %id with a start date of %start and an end date of %end.', array('%username' => $username, '%id' => $id, '%start' => $timestart, '%end' => $timeend));
   }
   else {
     watchdog('droodle', 'ERROR enrolling user %username into Moodle course %id.', array('%username' => $username, '%id' => $id), WATCHDOG_ERROR);
@@ -117,6 +118,145 @@ function droodle_add_group_member($account, $idnumber, $group) {
   }
   else {
     watchdog('droodle', 'ERROR adding user %username to group %group in Moodle course %id.', array('%username' => $username, '%group' => $group, '%id' => $id), WATCHDOG_ERROR);
+  }
+}
+
+function droodle_update_cohort($unchanged_cohort_name, $updated_cohort_name) {
+
+  $cohorts = droodle_droodle_get_cohorts();
+  foreach ( $cohorts as $cohort ) {
+  //$key = array_search($cohort_name, $cohort);
+    if ( $cohort['name'] == $unchanged_cohort_name ) {
+      // We have the cohort.
+      $cohort_id = $cohort['id'];
+      break;
+    }
+  }
+  if (isset($cohort_id)) {
+    $response =  droodle_droodle_update_cohort($cohort_id, $updated_cohort_name);
+
+    if ($response == 1) {
+      watchdog('droodle', 'Successfully updated cohort "%unchanged_cohort_name" to "%updated_cohort_name".', array('%unchanged_cohort_name' => $unchanged_cohort_name, '%updated_cohort_name' => $updated_cohort_name));
+    }
+    else {
+      watchdog('droodle', 'ERROR updating cohort "%unchanged_cohort_name".', array('%unchanged_cohort_name' => $unchanged_cohort_name), WATCHDOG_ERROR);
+    }
+  }
+  else {
+    watchdog('droodle', 'ERROR trying to update cohort "%unchanged_cohort_name".', array('%unchanged_cohort_name' => $unchanged_cohort_name), WATCHDOG_ERROR);
+  }
+
+}
+
+function droodle_delete_cohort($cohort_name) {
+
+  $cohorts = droodle_droodle_get_cohorts();
+
+  foreach ( $cohorts as $cohort ) {
+    if ( $cohort['name'] == $cohort_name ) {
+      // We have the cohort.
+      $cohort_id = $cohort['id'];
+      break;
+    }
+  }
+  if (isset($cohort_id)) {
+    $response =  droodle_droodle_delete_cohort($cohort_id);
+
+    if ($response == 1) {
+      watchdog('droodle', 'Successfully deleted cohort "%cohort_name".', array('%cohort_name' => $cohort_name));
+    }
+    else {
+      watchdog('droodle', 'ERROR deleting cohort "%cohort_name".', array('%cohort_name' => $cohort_name), WATCHDOG_ERROR);
+    }
+  }
+  else {
+    watchdog('droodle', 'ERROR deleting non existent cohort "%cohort_name".', array('%cohort_name' => $cohort_name), WATCHDOG_ERROR);
+  }
+}
+
+function droodle_add_cohort($cohort_name) {
+
+  $cohorts = droodle_droodle_get_cohorts();
+
+  foreach ( $cohorts as $cohort ) {
+    if ( $cohort['name'] == $cohort_name ) {
+      // We already have the cohort.
+      $cohort_id = $cohort['id'];
+      break;
+    }
+  }
+  if (!isset($cohort_id)) {
+    $cohort_id =  droodle_droodle_add_cohort($cohort_name);
+
+    if (is_int($cohort_id)) {
+      watchdog('droodle', 'Successfully created cohort "%cohort_name".', array('%cohort_name' => $cohort_name));
+    }
+    else {
+      watchdog('droodle', 'ERROR creating cohort "%cohort_name".', array('%cohort_name' => $cohort_name), WATCHDOG_ERROR);
+    }
+  }
+  else {
+    watchdog('droodle', 'ERROR cohort "%cohort_name" already exists.', array('%cohort_name' => $cohort_name), WATCHDOG_ERROR);
+  }
+}
+
+function droodle_add_cohort_member($account, $cohort_name) {
+
+  $username = $account->name;
+  $cohorts = droodle_droodle_get_cohorts();
+  foreach ( $cohorts as $cohort ) {
+    //$key = array_search($cohort_name, $cohort);
+    if ( $cohort['name'] == $cohort_name ) {
+      // We have the cohort.
+      $cohort_id = $cohort['id'];
+      break;
+    }
+  }
+  if (!isset($cohort_id)) {
+    $cohort_id = droodle_droodle_add_cohort($cohort_name);
+  } 
+ 
+  if (isset($cohort_id)) {
+    $response = droodle_droodle_add_cohort_member($username, $cohort_id);
+
+    if ($response == 1) {
+      watchdog('droodle', 'Successfully added user %username to cohort "%cohort_name".', array('%username' => $username, '%cohort_name' => $cohort_name));
+    }
+    else {
+      watchdog('droodle', 'ERROR adding user %username to cohort "%cohort_name".', array('%username' => $username, '%cohort_name' => $cohort_name), WATCHDOG_ERROR);
+    }
+  }  
+  else {
+    watchdog('droodle', 'ERROR trying to create cohort "%cohort_name".', array('%cohort_name' => $cohort_name), WATCHDOG_ERROR);
+  }
+}
+
+
+function droodle_remove_cohort_member($account, $cohort_name) {
+
+  $username = $account->name;
+  $cohorts = droodle_droodle_get_cohorts();
+  foreach ( $cohorts as $cohort ) {
+    //$key = array_search($cohort_name, $cohort);
+    if ( $cohort['name'] == $cohort_name ) {
+      // We have the cohort.
+      $cohort_id = $cohort['id'];
+      break;
+    }
+  }
+
+  if (isset($cohort_id)) {
+    $response = droodle_droodle_remove_cohort_member($username, $cohort_id);
+
+    if ($response == 1) {
+      watchdog('droodle', 'Successfully removed user %username from cohort "%cohort_name".', array('%username' => $username, '%cohort_name' => $cohort_name));
+    }
+    else {
+      watchdog('droodle', 'ERROR removing user %username from cohort "%cohort_name".', array('%username' => $username, '%cohort_name' => $cohort_name), WATCHDOG_ERROR);
+    }
+  }
+  else {
+    watchdog('droodle', 'ERROR removing user from non existent cohort "%cohort_name".', array('%cohort_name' => $cohort_name), WATCHDOG_ERROR);
   }
 }
 
@@ -184,6 +324,108 @@ function droodle_droodle_test_connection() {
   return $response;
 
 }
+
+function droodle_droodle_get_cohorts() {
+
+  $config = droodle_get_config();
+  $functionname = 'droodle_get_cohorts';
+  $data = array();
+
+  $url = $config['fqdn'] . $config['endpoint'] . '?wstoken=' . $config['token'] . '&wsfunction=' . $functionname . '&moodlewsrestformat=' . $config['restformat'];
+  $params = array();
+
+  $response = droodle_make_request($url, HttpClientRequest::METHOD_GET, $params, $data);
+
+  return $response;
+
+}
+
+function droodle_droodle_add_cohort($name) {
+
+  $config = droodle_get_config();
+  $functionname = 'droodle_add_cohort';
+  $data = array('name' => $name);
+
+  $url = $config['fqdn'] . $config['endpoint'] . '?wstoken=' . $config['token'] . '&wsfunction=' . $functionname . '&moodlewsrestformat=' . $config['restformat'];
+  $params = array();
+
+  $response = droodle_make_request($url, HttpClientRequest::METHOD_POST, $params, $data);
+
+  return $response;
+
+}
+
+function droodle_droodle_update_cohort($id, $name) {
+
+  $config = droodle_get_config();
+  $functionname = 'droodle_update_cohort';
+  $data = array('cohort_id' => $id, 'name' => $name);
+
+  $url = $config['fqdn'] . $config['endpoint'] . '?wstoken=' . $config['token'] . '&wsfunction=' . $functionname . '&moodlewsrestformat=' . $config['restformat'];
+  $params = array();
+
+  $response = droodle_make_request($url, HttpClientRequest::METHOD_POST, $params, $data);
+
+  return $response;
+
+}
+
+function droodle_droodle_delete_cohort($id) {
+
+  $config = droodle_get_config();
+  $functionname = 'droodle_delete_cohort';
+  $data = array('cohort_id' => $id);
+
+  $url = $config['fqdn'] . $config['endpoint'] . '?wstoken=' . $config['token'] . '&wsfunction=' . $functionname . '&moodlewsrestformat=' . $config['restformat'];
+  $params = array();
+
+  $response = droodle_make_request($url, HttpClientRequest::METHOD_POST, $params, $data);
+
+  return $response;
+
+}
+
+
+
+function droodle_droodle_add_cohort_member($username, $cohort_id) {
+
+  $config = droodle_get_config();
+  $functionname = 'droodle_add_cohort_member';
+  $data = array(
+    'username' => $username,
+    'cohort_id' => $cohort_id,
+  );
+
+
+  $url = $config['fqdn'] . $config['endpoint'] . '?wstoken=' . $config['token'] . '&wsfunction=' . $functionname . '&moodlewsrestformat=' . $config['restformat'];
+  $params = array();
+
+  $response = droodle_make_request($url, HttpClientRequest::METHOD_POST, $params, $data);
+
+  return $response;
+
+}
+
+function droodle_droodle_remove_cohort_member($username, $cohort_id) {
+
+  $config = droodle_get_config();
+  $functionname = 'droodle_remove_cohort_member';
+  $data = array(
+    'username' => $username,
+    'cohort_id' => $cohort_id,
+  );
+
+
+  $url = $config['fqdn'] . $config['endpoint'] . '?wstoken=' . $config['token'] . '&wsfunction=' . $functionname . '&moodlewsrestformat=' . $config['restformat'];
+  $params = array();
+
+  $response = droodle_make_request($url, HttpClientRequest::METHOD_POST, $params, $data);
+
+  return $response;
+
+}
+
+
 
 function droodle_droodle_create_user($user) {
   //create the moodle user
@@ -293,10 +535,11 @@ function droodle_make_request($url, $method, $params, $data) {
   //debug($request);
   try {
     $response = $client->execute($request);
-    if ($response['exception']) {
-      watchdog('droodle', 'Exception detected. Exception: %e, Message: %m, Error code: %ec', array('%e' => $response['exception'], '%m' => $response['message'], '%ec' => $response['errorcode']), WATCHDOG_ERROR);
+    if (is_array($response)) {
+      if (array_key_exists('exception', $response)) {
+        watchdog('droodle', 'Exception detected. Exception: %e, Message: %m, Error code: %ec', array('%e' => $response['exception'], '%m' => $response['message'], '%ec' => $response['errorcode']), WATCHDOG_ERROR);
+      }
     }
-    //debug($response);
   }
   catch (HttpClientException $e) {
     //debug($e);
