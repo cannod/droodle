@@ -542,7 +542,7 @@ function droodle_make_request($url, $method, $params, $data) {
     }
   }
   catch (HttpClientException $e) {
-    //debug($e);
+    debug($e);
     watchdog('droodle', '%e', array('%e' => $e), WATCHDOG_ERROR);
   }
 
